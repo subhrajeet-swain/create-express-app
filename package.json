@@ -27,5 +27,8 @@
   "bugs": {
     "url": "https://github.com/subhrajeet-swain/create-express-app/issues"
   },
-  "homepage": "https://github.com/subhrajeet-swain/create-express-app#readme"
+  "homepage": "https://github.com/subhrajeet-swain/create-express-app#readme",
+  "dependencies": {
+    "fs-extra": "^11.2.0"
+  }
 }
