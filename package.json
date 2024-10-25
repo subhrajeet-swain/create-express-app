@@ -1,0 +1,31 @@
+{
+  "name": "create-express-app",
+  "version": "1.1.0",
+  "description": "A CLI tool to generate an express app with 3-layer approach folder structure",
+  "main": "bin/cli.js",
+  "bin": {
+    "create-express-app": "bin/cli.js"
+  },
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/subhrajeet-swain/create-express-app.git"
+  },
+  "keywords": [
+    "express",
+    "app",
+    "cli",
+    "node"
+  ],
+  "author": "subhrajeet-swain",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/subhrajeet-swain/create-express-app/issues"
+  },
+  "homepage": "https://github.com/subhrajeet-swain/create-express-app#readme"
+}
