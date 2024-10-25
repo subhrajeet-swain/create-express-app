@@ -1,15 +1,16 @@
 {
-  "name": "create-express-app",
-  "version": "1.1.0",
+  "name": "node-folder-structure",
+  "version": "1.1.3",
   "description": "A CLI tool to generate an express app with 3-layer approach folder structure",
   "main": "bin/cli.js",
   "bin": {
-    "create-express-app": "bin/cli.js"
+    "node-folder-structure": "bin/cli.js"
   },
   "directories": {
     "lib": "lib"
   },
   "scripts": {
+    "postinstall": "node bin/cli.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -20,7 +21,9 @@
     "express",
     "app",
     "cli",
-    "node"
+    "node",
+    "folder",
+    "structure"
   ],
   "author": "subhrajeet-swain",
   "license": "ISC",
