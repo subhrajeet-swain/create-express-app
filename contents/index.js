@@ -100,8 +100,7 @@ module.exports = {
     dbName
 };`
 
-const user_controller_js = `// User controller
-const { createUser, getUserById, deleteUserById } = require("../models");
+const user_controller_js = `const { UserService } = require("../services");
 const { asyncHandler } = require("../utils");
 const { validateUserData } = require("../validators/index");
 
@@ -111,10 +110,7 @@ exports.createUser = asyncHandler(async (req, res) => {
     // Validate here the req.body using a schema validator like ajv, joi or express validator
     validateUserData(userDetails);
 
-    const newUser = await createUser(userDetails);
-    if (!newUser) {
-        throw new ApiError(500, "Something went wrong while registering the user")
-    }
+    const newUser = await UserService.signup(userDetails);
     return res.status(201).json(
         new ApiResponse(200, newUser, "User registered Successfully")
     )
@@ -122,10 +118,7 @@ exports.createUser = asyncHandler(async (req, res) => {
 
 // Get user by ID
 exports.getUserById = asyncHandler(async (req, res) => {
-    const user = await getUserById(req.params.id);
-    if (!newUser) {
-        throw new ApiError(500, "Something went wrong while fetching the user")
-    }
+    const user = await UserService.getUser(req.params.id);
     return res.status(201).json(
         new ApiResponse(200, user, "User found Successfully")
     )
@@ -134,12 +127,9 @@ exports.getUserById = asyncHandler(async (req, res) => {
 
 // Delete user by ID
 exports.deleteUserById = asyncHandler(async (req, res) => {
-    const deletedUser = await deleteUserById(req.params.id);
-    if (!deletedUser) {
-        throw new ApiError(500, "Something went wrong while fetching the user")
-    }
+    const deletedUser = await UserService.deleteUserById(req.params.id);
     return res.status(201).json(
-        new ApiResponse(200, user, "User found Successfully")
+        new ApiResponse(200, deletedUser, "User found Successfully")
     )
 });
 `
@@ -235,8 +225,7 @@ const middleware_index_js = `// Middlewares index file
 const model_seeders_js = `// Data seeders
 `
 
-const user_model_js = `// User model
-const { Schema } = require("mongoose");
+const user_model_js = `const { Schema } = require("mongoose");
 const { ApiError } = require("../utils/index");
 
 const UserModel = new Schema({
@@ -246,30 +235,25 @@ const UserModel = new Schema({
     address: String,
 });
 
-exports.createUser = async (userDetails) => {
-    const existingUser = await UserModel.findOne({
+exports.existingUser = async (username, email) => {
+    await UserModel.findOne({
         $or: [{ username }, { email }]
     });
-    if (existingUser) {
-        throw new ApiError(409, "User with email or username already exists")
-    }
+    return true; // User with email or username already exists
+}
+
+exports.createUser = async (userDetails) => {
     const newUser = await UserModel.create(userDetails);
     return newUser;
 }
 
 exports.getUserById = async (id) => {
     const user = await UserModel.findById(id);
-    if (!user) {
-        throw new ApiError(409, "User not found")
-    }
     return user;
 }
 
 exports.deleteUserById = async (id) => {
     const deletedUser = await UserModel.findByIdAndDelete(id);
-    if (!deletedUser) {
-        throw new ApiError(409, "User not found or already deleted")
-    }
     return deletedUser;
 }
 `
@@ -308,19 +292,47 @@ module.exports = {
     userRoutes
 }`
 
-const stripe_services_js = `// Stripe services
-const { stripe } = require("../configs");
+const user_services_js = `const { createUser, getUserById, deleteUserById } = require("../models");
 
-const createCustomer = await stripe.customers.create({
-    name: 'Jenny Rosen',
-    email: 'jennyrosen@example.com',
-});`
+exports.UserService = {
+    async signup(user) {
+        const existingUser = await existingUser(user.username, user.email);
+
+        if (existingUser) {
+            throw new ApiError(400, "User with email or username already exists")
+        }
+        const userRecord = await createUser(user);
+        return { user: userRecord };
+    },
+
+    async getUser(userId) {
+        const user = await getUserById(userId);
+        if (!user) {
+            throw new ApiError(404, "User not found")
+        }
+        return user;
+    },
+
+    async deleteUserById(userId) {
+        const deletedUser = await deleteUserById(userId);
+        if (!deletedUser) {
+            throw new ApiError(409, "User not found or already deleted")
+        }
+        return { message: "User deleted successfully" };
+    }
+}
+
+`
 
 const inventory_services_js = `// Inventory services
 //Checking the inventory for some products or orders`
 
-const services_index_js = `// Services index file
-// Services is used for any external services required, for example, contacting any third pary APIs, verifying inventory, payment sevices, ect.`
+const services_index_js = `const { UserService } = require("./user.services");
+
+// Services is used for any external services required, for example, contacting any third pary APIs, verifying inventory, payment sevices, ect.
+module.exports = {
+    UserService
+}`
 
 const utils_apiError_js = `//ApiError
 class ApiError extends Error {
@@ -480,7 +492,7 @@ module.exports = {
     model_index_js,
     user_routes_js,
     routes_index_js,
-    stripe_services_js,
+    user_services_js,
     inventory_services_js,
     services_index_js,
     utils_apiError_js,
