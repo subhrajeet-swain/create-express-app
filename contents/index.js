@@ -1,5 +1,4 @@
-const app_js = `
-// Main application entry point
+const app_js = `// Main application entry point
 const express = require("express");
 
 const app = express();
@@ -18,8 +17,7 @@ module.exports = {
     app
 }`
 
-const index_js = `
-// Application start file
+const index_js = `// Application start file
 const dotenv = require("dotenv");
 const { app } = require("./app.js");
 const { connectDB } = require("./configs/db.config.js");
@@ -39,8 +37,7 @@ connectDB()
         console.log("MONGO db connection failed !!! ", err);
     })`
 
-const git_ignore = `
-/vendor
+const git_ignore = `/vendor
 /node_modules
 /public/storage
 Homestead.yaml
@@ -55,8 +52,7 @@ error_log
 .DS_Store
 `
 
-const dotenv = `
-# Environment variables sample
+const dotenv = `# Environment variables sample
 PORT=8000
 MONGODB_URI="mongodb://localhost:27017/"
 CORS_ORIGIN=*
@@ -68,7 +64,7 @@ REFRESH_TOKEN_EXPIRY=10d
 STRIPE_SECRET_KEY=your_secret_key
 `
 
-const dbconfig_js = `
+const dbconfig_js = `// Database configuration
 const mongoose = require('mongoose');
 const { dbName } = require('../constants');
 
@@ -83,7 +79,7 @@ exports.connectDB = async () => {
     }
 };
 `
-const dbindex_js = `
+const dbindex_js = `// Configs index file
 const { connectDB } = require("./db.config");
 // const { stripe } = require("./stripe.config");
 
@@ -94,16 +90,17 @@ module.exports = {
 
 const stripeconfig_js = `// exports.stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);`
 
-const dbname_js = `exports.dbName = "your-database-name";`
+const dbname_js = `// Define your DB names
+exports.dbName = "your-database-name";`
 
-const constant_index_js = `
+const constant_index_js = `// Constants index file
 const { dbName } = require("./dbName");
 
 module.exports = {
     dbName
 };`
 
-const user_controller_js = `
+const user_controller_js = `// User controller
 const { createUser, getUserById, deleteUserById } = require("../models");
 const { asyncHandler } = require("../utils");
 const { validateUserData } = require("../validators/index");
@@ -147,7 +144,7 @@ exports.deleteUserById = asyncHandler(async (req, res) => {
 });
 `
 
-const controller_index_js = `
+const controller_index_js = `// Controllers index file
 const { createUser, getUserById, deleteUserById } = require("./user.controller");
 
 module.exports = {
@@ -156,7 +153,7 @@ module.exports = {
     deleteUserById
 }`
 
-const cron_jobs_js = `
+const cron_jobs_js = `// Cron jobs
 // Cron jobs are scheduled tasks that run at specific intervals in the background, commonly used for maintenance or repetitive tasks.Users can schedule commands the OS will run these commands automatically according to the given time.It is usually used for system admin jobs such as backups, logging, sending newsletters, subscription emails and more.
 
 // Creating a cron job which runs on specified time 10 am
@@ -164,14 +161,14 @@ const cron_jobs_js = `
 //     console.log("running a task everyday at 10 am");
 // });`
 
-const jobs_index = `
+const jobs_index = `// Jobs index file
 const { scheduleCronJob } = require("./cron.jobs");
 
 // module.exports = {
 //     scheduleCronJob
 // };`
 
-const config_loaders_js = `
+const config_loaders_js = `// Config loader
 // const _ = require('lodash');
 
 // // Example configuration validation in a loader
@@ -191,9 +188,307 @@ const config_loaders_js = `
 
 // validateConfig(config);`
 
+const loaders_index_js = `// Loaders index file
+// loaders folder contains Lodash routes, configurations, and is responsible for validating configurations`
+
+const auth_middleware_js = `// Authentication middleware
+// exports.verifyToken = asyncHandler(async (req, _, next) => {
+//     try {
+//         const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "")
+
+//         // console.log(token);
+//         if (!token) {
+//             throw new ApiError(401, "Unauthorized request")
+//         }
+
+//         req.user = user;
+//         next()
+//     } catch (error) {
+//         throw new ApiError(401, error?.message || "Invalid access token")
+//     }
+
+// })`
+
+const multer_middleware_js = `// Multer middleware
+// const multer = require("multer");
+
+// const storage = multer.diskStorage({
+//     destination: function (req, file, cb) {
+//         cb(null, "./public/temp");
+//     },
+//     filename: function (req, file, cb) {
+//         cb(null, file.originalname);
+//     }
+// });
+
+// exports.upload = multer({ storage });`
+
+const middleware_index_js = `// Middlewares index file
+//const { verifyToken } = require("./auth.middleware");
+//const { upload } = require("./multer.middleware");
+
+//module.exports = {
+//    verifyToken,
+//    upload
+//}`
+
+const model_seeders_js = `// Data seeders
+`
+
+const user_model_js = `// User model
+const { Schema } = require("mongoose");
+const { ApiError } = require("../utils/index");
+
+const UserModel = new Schema({
+    username: String,
+    phone: String,
+    email: String,
+    address: String,
+});
+
+exports.createUser = async (userDetails) => {
+    const existingUser = await UserModel.findOne({
+        $or: [{ username }, { email }]
+    });
+    if (existingUser) {
+        throw new ApiError(409, "User with email or username already exists")
+    }
+    const newUser = await UserModel.create(userDetails);
+    return newUser;
+}
+
+exports.getUserById = async (id) => {
+    const user = await UserModel.findById(id);
+    if (!user) {
+        throw new ApiError(409, "User not found")
+    }
+    return user;
+}
+
+exports.deleteUserById = async (id) => {
+    const deletedUser = await UserModel.findByIdAndDelete(id);
+    if (!deletedUser) {
+        throw new ApiError(409, "User not found or already deleted")
+    }
+    return deletedUser;
+}
+`
+
+const model_index_js = `// Models index file
+const { createUser, deleteUserById, getUserById } = require("./user.model");
+
+module.exports = {
+    createUser,
+    getUserById,
+    deleteUserById,
+};
+`
+
+const user_routes_js = `// User routes
+const express = require("express");
+const { createUser, getUserById, deleteUserById } = require("../controllers");
+
+const router = new express.Router();
+
+router
+    .route("")
+    .post(createUser);
+
+router
+    .route("/:id")
+    .get(getUserById)
+    .delete(deleteUserById);
+
+module.exports = router;`
+
+const routes_index_js = `// Routes index file
+const userRoutes = require("./user.routes");
+
+module.exports = {
+    userRoutes
+}`
+
+const stripe_services_js = `// Stripe services
+const { stripe } = require("../configs");
+
+const createCustomer = await stripe.customers.create({
+    name: 'Jenny Rosen',
+    email: 'jennyrosen@example.com',
+});`
+
+const inventory_services_js = `// Inventory services
+//Checking the inventory for some products or orders`
+
+const services_index_js = `// Services index file
+// Services is used for any external services required, for example, contacting any third pary APIs, verifying inventory, payment sevices, ect.`
+
+const utils_apiError_js = `//ApiError
+class ApiError extends Error {
+    constructor(
+        statusCode,
+        message = "Something went wrong",
+        errors = [],
+        stack = ""
+    ) {
+        super(message)
+        this.statusCode = statusCode
+        this.data = null
+        this.message = message
+        this.success = false;
+        this.errors = errors
+
+        if (stack) {
+            this.stack = stack
+        } else {
+            Error.captureStackTrace(this, this.constructor)
+        }
+
+    }
+}`
+
+const utils_apiResponse_js = `//Api response
+class ApiResponse {
+    constructor(statusCode, data, message = "Success") {
+        this.statusCode = statusCode
+        this.data = data
+        this.message = message
+        this.success = statusCode < 400
+    }
+}`
+
+const utils_asynchandler_js = `//Higher order functions
+exports.asyncHandler = (fn) => {
+    return (req, res, next) => {
+        Promise.resolve(fn(req, res, next))
+            .catch((err) => {
+                // Set the status code to indicate an error
+                console.error(err);
+                res.status(500).json({
+                    success: false,
+                    error: 'Internal server error',
+                    message: err.message
+                });
+            });
+    };
+};`
+
+const utils_generateToken_js = `//Generating tokens
+// const jwt = require("jsonwebtoken");
+// const { RefreshToken } = require("../models/RefreshTokenModel");
+
+// exports.generateAccessToken = (userId) => {
+//     const token = jwt.sign({
+//         id: userId,
+//     }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRY });
+
+//     return token;
+// };
+
+
+// // Function to generate refresh token
+// exports.generateRefreshToken = async (userId) => {
+//     try {
+//         const refreshToken = jwt.sign({
+//             id: userId
+//         }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
+//         await RefreshToken.findOneAndDelete({ userId: userId });
+//         await new RefreshToken({ userId, refreshToken: refreshToken }).save();
+//         return refreshToken;
+//     } catch (error) {
+//         console.error('Error generating refresh token:', error);
+//         throw new Error('Unable to generate refresh token');
+//     }
+// };`
+
+const utils_index_js = `// Utils index file
+const { ApiError } = require("./apiError");
+const { ApiResponse } = require("./apiResponse");
+const { asyncHandler } = require("./asyncHandler");
+const { generateAccessToken, generateRefreshToken } = require("./generateToken");
+
+module.exports = {
+    asyncHandler,
+    generateAccessToken,
+    generateRefreshToken,
+    ApiResponse,
+    ApiError
+}`
+
+const validators_user_js = `// User input validation
+// const Ajv = require("ajv");
+// const ajv = new Ajv();
+
+// const userSchema = {
+//     type: "object",
+//     properties: {
+//         username: { type: "string" },
+//         phone: {
+//             type: "string",
+//             pattern: "^[0-9]{10}$" // Optional: Basic pattern for a 10-digit phone number
+//         },
+//         email: {
+//             type: "string",
+//             format: "email" // Using the built-in email format validation
+//         },
+//         address: { type: "string" }
+//     },
+//     required: ["username", "email"], // Specify required fields
+//     additionalProperties: false // Disallow extra fields
+// };
+
+// const validateUser = ajv.compile(userSchema);
+
+// // Validate user data
+// exports.validateUserData = (data) => {
+//     const valid = validateUser(data);
+//     if (!valid) {
+//         const errors = validateUser.errors.map(error => ({
+//             field: error.instancePath,
+//             message: error.message,
+//         }));
+//         throw new ApiError(400, "Validation Error", errors);
+//     }
+// };`
+
+const validators_index_js = `// Validators index file
+const { validateUserData } = require("./user.validator");
+
+module.exports = {
+    validateUserData
+}`
+
 module.exports = {
     app_js,
     index_js,
     git_ignore,
+    dbconfig_js,
+    dbindex_js,
+    stripeconfig_js,
+    dbname_js,
+    constant_index_js,
+    user_controller_js,
+    controller_index_js,
+    cron_jobs_js,
+    jobs_index,
+    config_loaders_js,
+    loaders_index_js,
+    auth_middleware_js,
+    multer_middleware_js,
+    middleware_index_js,
+    model_seeders_js,
+    user_model_js,
+    model_index_js,
+    user_routes_js,
+    routes_index_js,
+    stripe_services_js,
+    inventory_services_js,
+    services_index_js,
+    utils_apiError_js,
+    utils_apiResponse_js,
+    utils_asynchandler_js,
+    utils_generateToken_js,
+    utils_index_js,
+    validators_user_js,
+    validators_index_js,
     dotenv,
 }
